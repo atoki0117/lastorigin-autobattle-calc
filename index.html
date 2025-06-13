@@ -18,10 +18,16 @@
       border-radius: 10px;
       box-shadow: 0 2px 10px rgba(0,0,0,0.1);
     }
-    label, input {
-      display: block;
+    label {
+      display: flex;
+      align-items: center;
       margin-bottom: 1em;
-      width: 100%;
+    }
+    label span {
+      flex: 1;
+    }
+    input[type="number"], input[type="checkbox"] {
+      flex: 1;
     }
     input[type="number"] {
       padding: 0.5em;
@@ -42,35 +48,45 @@
       color: red;
       font-weight: bold;
     }
+    footer {
+      margin-top: 2em;
+      font-size: 0.9em;
+      color: #888;
+      text-align: center;
+    }
   </style>
 </head>
 <body>
   <div class="container">
     <h1>ラストオリジン 自律戦闘時間計算ツール</h1>
     <label>
-      待機室容量:
+      <span>待機室容量:</span>
       <input type="number" id="waitingRoom" min="0" oninput="handleInput(this)">
     </label>
     <label>
-      倉庫容量:
+      <span>倉庫容量:</span>
       <input type="number" id="storage" min="0" oninput="handleInput(this)">
     </label>
     <label>
-      臨時待機室容量:
+      <span>臨時待機室容量:</span>
       <input type="number" id="tempWaitingRoom" min="0" oninput="handleInput(this)">
     </label>
     <label>
-      臨時倉庫容量:
+      <span>臨時倉庫容量:</span>
       <input type="number" id="tempStorage" min="0" oninput="handleInput(this)">
     </label>
     <label>
-      ツナ缶定期発注(大)購入中:
+      <span>ツナ缶定期発注(大)購入中:</span>
       <input type="checkbox" id="hasSubscription" onchange="handleInput(this)">
     </label>
     <div id="result"></div>
     <div id="warning"></div>
     <div id="nextHourHint"></div>
   </div>
+
+  <footer>
+    データ参照元: <a href="https://seesaawiki.jp/lastorigin/d/%BC%AB%CE%A7%C0%EF%C6%AE" target="_blank">Last Origin Wiki - 自律戦闘</a>
+  </footer>
 
   <script>
     const fields = ["waitingRoom", "tempWaitingRoom", "storage", "tempStorage", "hasSubscription"];
@@ -137,10 +153,12 @@
       const cheapest = costList.reduce((min, curr) => curr.cost < min.cost ? curr : min, costList[0]);
 
       const warningDiv = document.getElementById('warning');
-      if (total > maxHours || total === maxHours && (totalCapacity % 1000 !== 0 || subscriptionBonus === 0 && extraHours >= 9)) {
-        const trueTotal = baseHours + extraHours + subscriptionBonus;
-        const overHours = trueTotal - maxHours;
-        const overCapacity = totalCapacity - ((maxHours - baseHours - subscriptionBonus) * 1000);
+      const overCapacityLimit = (maxHours - baseHours - subscriptionBonus) * 1000;
+      const isOver = total > maxHours || (total === maxHours && (totalCapacity > overCapacityLimit));
+
+      if (isOver) {
+        const overHours = total - maxHours;
+        const overCapacity = totalCapacity - overCapacityLimit;
         warningDiv.innerHTML = `⚠ 自律戦闘時間は最大 ${maxHours} 時間です（<strong>${overHours} 時間</strong>・<strong>${overCapacity} 容量</strong>分オーバーしています）。`;
         total = maxHours;
       } else {
