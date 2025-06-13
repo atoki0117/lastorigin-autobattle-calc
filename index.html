@@ -53,6 +53,7 @@
       margin-top: 1em;
       color: red;
       font-weight: bold;
+      white-space: pre-line;
     }
   </style>
 </head>
@@ -122,12 +123,15 @@
       const hasSubscription = document.getElementById('hasSubscription').checked;
 
       const totalCapacity = waitingRoom + tempWaitingRoom + storage + tempStorage;
-      const extraHours = Math.floor(totalCapacity / 1000);
       const baseHours = 3;
       const subscriptionBonus = hasSubscription ? 1 : 0;
+      const extraHours = Math.floor(totalCapacity / 1000);
 
       let total = baseHours + extraHours + subscriptionBonus;
       const maxHours = 12;
+
+      // 最大時間から基本とツナ缶分を引いた容量の最大値
+      const maxCapacity = 1000 * (maxHours - baseHours - subscriptionBonus);
 
       const nextThreshold = (extraHours + 1) * 1000;
       const diff = nextThreshold - totalCapacity;
@@ -148,12 +152,12 @@
 
       const cheapest = costList.reduce((min, curr) => curr.cost < min.cost ? curr : min, costList[0]);
 
-      // 上限チェックと表示
       const warningDiv = document.getElementById('warning');
       if (total > maxHours) {
         const overHours = total - maxHours;
+        const overCapacity = totalCapacity - maxCapacity;
         total = maxHours;
-        warningDiv.textContent = `⚠ 自律戦闘時間は最大 ${maxHours} 時間です。（${overHours} 時間分オーバーしています）`;
+        warningDiv.innerHTML = `⚠ 自律戦闘時間は最大 ${maxHours} 時間です。\n容量が ${overCapacity} を超えています（${overHours} 時間分オーバー）。`;
       } else {
         warningDiv.textContent = "";
       }
