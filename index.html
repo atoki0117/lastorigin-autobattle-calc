@@ -32,6 +32,11 @@
       font-size: 1.2em;
       font-weight: bold;
     }
+    #nextHourHint {
+      margin-top: 0.5em;
+      font-size: 1em;
+      color: #555;
+    }
   </style>
 </head>
 <body>
@@ -58,6 +63,7 @@
       <input type="checkbox" id="hasSubscription" checked onchange="calculate()">
     </label>
     <div id="result"></div>
+    <div id="nextHourHint"></div>
   </div>
 
   <script>
@@ -68,13 +74,45 @@
       const tempStorage = parseInt(document.getElementById('tempStorage').value) || 0;
       const hasSubscription = document.getElementById('hasSubscription').checked;
 
-      const extraHours = Math.floor((waitingRoom + tempWaitingRoom + storage + tempStorage) / 1000);
+      const totalCapacity = waitingRoom + tempWaitingRoom + storage + tempStorage;
+      const extraHours = Math.floor(totalCapacity / 1000);
       const baseHours = 3;
       const subscriptionBonus = hasSubscription ? 1 : 0;
 
       const total = baseHours + extraHours + subscriptionBonus;
+      const nextThreshold = (extraHours + 1) * 1000;
+      const diff = nextThreshold - totalCapacity;
+
+      // コスト設定
+      const costs = {
+        waitingRoom: 20 / 10,         // 2 ツナ缶 / 100 容量
+        tempWaitingRoom: 20 / 10,     // 2 ツナ缶 / 100 容量
+        storage: 10 / 20,             // 0.5 ツナ缶 / 100 容量
+        tempStorage: 5 / 10           // 0.5 ツナ缶 / 100 容量
+      };
+
+      // 個別コスト計算
+      const costList = [
+        { name: '待機室容量', cost: Math.ceil(diff * costs.waitingRoom) },
+        { name: '臨時待機室容量', cost: Math.ceil(diff * costs.tempWaitingRoom) },
+        { name: '倉庫容量', cost: Math.ceil(diff * costs.storage) },
+        { name: '臨時倉庫容量', cost: Math.ceil(diff * costs.tempStorage) },
+      ];
+
+      // 最安コスト
+      const cheapest = costList.reduce((min, curr) => curr.cost < min.cost ? curr : min, costList[0]);
 
       document.getElementById('result').textContent = `自律戦闘可能時間: ${total} 時間`;
+
+      let hintHtml = `次の1時間を追加するにはあと ${diff} 容量が必要です。<br>`;
+      hintHtml += `最小コストで拡張するには:<br>`;
+      hintHtml += `・<strong>${cheapest.name}</strong> を拡張 → <strong>${cheapest.cost} ツナ缶</strong><br><br>`;
+      hintHtml += `他の選択肢:<br>`;
+      costList.forEach(item => {
+        hintHtml += `・${item.name} を拡張 → 約 ${item.cost} ツナ缶<br>`;
+      });
+
+      document.getElementById('nextHourHint').innerHTML = hintHtml;
     }
 
     window.onload = calculate;
