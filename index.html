@@ -37,6 +37,11 @@
       font-size: 1em;
       color: #555;
     }
+    #warning {
+      margin-top: 1em;
+      color: red;
+      font-weight: bold;
+    }
   </style>
 </head>
 <body>
@@ -63,6 +68,7 @@
       <input type="checkbox" id="hasSubscription" onchange="handleInput(this)">
     </label>
     <div id="result"></div>
+    <div id="warning"></div>
     <div id="nextHourHint"></div>
   </div>
 
@@ -108,7 +114,9 @@
       const baseHours = 3;
       const subscriptionBonus = hasSubscription ? 1 : 0;
 
-      const total = baseHours + extraHours + subscriptionBonus;
+      let total = baseHours + extraHours + subscriptionBonus;
+      const maxHours = 12;
+
       const nextThreshold = (extraHours + 1) * 1000;
       const diff = nextThreshold - totalCapacity;
 
@@ -127,6 +135,16 @@
       ];
 
       const cheapest = costList.reduce((min, curr) => curr.cost < min.cost ? curr : min, costList[0]);
+
+      // 上限チェックと表示
+      const warningDiv = document.getElementById('warning');
+      if (total > maxHours) {
+        const overHours = total - maxHours;
+        total = maxHours;
+        warningDiv.textContent = `⚠ 自律戦闘時間は最大 ${maxHours} 時間です（${overHours} 時間分オーバーしています）。`;
+      } else {
+        warningDiv.textContent = "";
+      }
 
       document.getElementById('result').textContent = `自律戦闘可能時間: ${total} 時間`;
 
