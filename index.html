@@ -26,12 +26,16 @@
     label span {
       flex: 1;
     }
-    input[type="number"], input[type="checkbox"] {
-      flex: 1;
-    }
     input[type="number"] {
       padding: 0.5em;
       font-size: 1em;
+      flex: 1;
+    }
+    input[type="checkbox"] {
+      flex: 0 0 auto;
+      margin-left: 0.5em;
+      margin-right: 0;
+      width: auto;
     }
     #result {
       margin-top: 1.5em;
@@ -85,7 +89,7 @@
   </div>
 
   <footer>
-    データ参照元: <a href="https://seesaawiki.jp/lastorigin/d/%BC%AB%CE%A7%C0%EF%C6%AE" target="_blank">Last Origin Wiki - 自律戦闘</a>
+    データ参照元: <a href="https://seesaawiki.jp/lastorigin/d/%BC%AB%CE%A7%C0%EF%C6%AE" target="_blank" rel="noopener noreferrer">Last Origin Wiki - 自律戦闘</a>
   </footer>
 
   <script>
