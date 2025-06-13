@@ -44,29 +44,58 @@
     <h1>自律戦闘時間計算ツール</h1>
     <label>
       待機室容量:
-      <input type="number" id="waitingRoom" value="1500" min="0" oninput="calculate()">
-    </label>
-    <label>
-      臨時待機室容量:
-      <input type="number" id="tempWaitingRoom" value="2500" min="0" oninput="calculate()">
+      <input type="number" id="waitingRoom" min="0" oninput="handleInput(this)">
     </label>
     <label>
       倉庫容量:
-      <input type="number" id="storage" value="1500" min="0" oninput="calculate()">
+      <input type="number" id="storage" min="0" oninput="handleInput(this)">
+    </label>
+    <label>
+      臨時待機室容量:
+      <input type="number" id="tempWaitingRoom" min="0" oninput="handleInput(this)">
     </label>
     <label>
       臨時倉庫容量:
-      <input type="number" id="tempStorage" value="2500" min="0" oninput="calculate()">
+      <input type="number" id="tempStorage" min="0" oninput="handleInput(this)">
     </label>
     <label>
       ツナ缶定期発注(大)購入中:
-      <input type="checkbox" id="hasSubscription" checked onchange="calculate()">
+      <input type="checkbox" id="hasSubscription" onchange="handleInput(this)">
     </label>
     <div id="result"></div>
     <div id="nextHourHint"></div>
   </div>
 
   <script>
+    const fields = ["waitingRoom", "tempWaitingRoom", "storage", "tempStorage", "hasSubscription"];
+
+    function saveValues() {
+      fields.forEach(id => {
+        const el = document.getElementById(id);
+        const value = el.type === "checkbox" ? el.checked : el.value;
+        localStorage.setItem(id, value);
+      });
+    }
+
+    function loadValues() {
+      fields.forEach(id => {
+        const el = document.getElementById(id);
+        const value = localStorage.getItem(id);
+        if (value !== null) {
+          if (el.type === "checkbox") {
+            el.checked = (value === "true");
+          } else {
+            el.value = value;
+          }
+        }
+      });
+    }
+
+    function handleInput(el) {
+      saveValues();
+      calculate();
+    }
+
     function calculate() {
       const waitingRoom = parseInt(document.getElementById('waitingRoom').value) || 0;
       const tempWaitingRoom = parseInt(document.getElementById('tempWaitingRoom').value) || 0;
@@ -83,15 +112,13 @@
       const nextThreshold = (extraHours + 1) * 1000;
       const diff = nextThreshold - totalCapacity;
 
-      // コスト設定
       const costs = {
-        waitingRoom: 20 / 10,         // 2 ツナ缶 / 100 容量
-        tempWaitingRoom: 20 / 10,     // 2 ツナ缶 / 100 容量
-        storage: 10 / 20,             // 0.5 ツナ缶 / 100 容量
-        tempStorage: 5 / 10           // 0.5 ツナ缶 / 100 容量
+        waitingRoom: 20 / 10,
+        tempWaitingRoom: 20 / 10,
+        storage: 10 / 20,
+        tempStorage: 5 / 10
       };
 
-      // 個別コスト計算
       const costList = [
         { name: '待機室容量', cost: Math.ceil(diff * costs.waitingRoom) },
         { name: '臨時待機室容量', cost: Math.ceil(diff * costs.tempWaitingRoom) },
@@ -99,7 +126,6 @@
         { name: '臨時倉庫容量', cost: Math.ceil(diff * costs.tempStorage) },
       ];
 
-      // 最安コスト
       const cheapest = costList.reduce((min, curr) => curr.cost < min.cost ? curr : min, costList[0]);
 
       document.getElementById('result').textContent = `自律戦闘可能時間: ${total} 時間`;
@@ -115,7 +141,10 @@
       document.getElementById('nextHourHint').innerHTML = hintHtml;
     }
 
-    window.onload = calculate;
+    window.onload = function () {
+      loadValues();
+      calculate();
+    };
   </script>
 </body>
 </html>
