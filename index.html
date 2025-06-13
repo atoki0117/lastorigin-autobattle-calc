@@ -67,14 +67,6 @@
       text-align: center;
     }
   </style>
-  <!-- Google tag (gtag.js) -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-G590WN0HJ8"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'G-G590WN0HJ8');
-  </script>
 </head>
 <body>
   <div class="container">
@@ -138,6 +130,10 @@
       calculate();
     }
 
+    function ceilToNearest10(n) {
+      return Math.ceil(n / 10) * 10;
+    }
+
     function calculate() {
       const waitingRoom = parseInt(document.getElementById('waitingRoom').value) || 0;
       const tempWaitingRoom = parseInt(document.getElementById('tempWaitingRoom').value) || 0;
@@ -170,7 +166,7 @@
         { name: '装備臨時倉庫', cost: Math.ceil(diff * costs.tempStorage) },
       ];
 
-      // ★ 固定で「装備臨時倉庫」を選択
+      // 固定で「装備臨時倉庫」を最小コスト候補として表示
       const cheapest = costList.find(item => item.name === '装備臨時倉庫');
 
       const warningDiv = document.getElementById('warning');
@@ -193,7 +189,8 @@
       hintHtml += `・<strong>${cheapest.name}</strong> を拡張 → <strong>${cheapest.cost} ツナ缶</strong><br><br>`;
       hintHtml += `他の選択肢:<br>`;
       costList.forEach(item => {
-        hintHtml += `・${item.name} を拡張 → 約 ${item.cost} ツナ缶<br>`;
+        const roundedCost = ceilToNearest10(item.cost);
+        hintHtml += `・${item.name} を拡張 → ${roundedCost} ツナ缶<br>`;
       });
 
       document.getElementById('nextHourHint').innerHTML = hintHtml;
