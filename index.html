@@ -80,19 +80,19 @@
   <div class="container">
     <h1>ラストオリジン 自律戦闘時間計算ツール</h1>
     <label>
-      <span>待機室容量:</span>
+      <span>戦闘員待機室:</span>
       <input type="number" id="waitingRoom" min="0" oninput="handleInput(this)">
     </label>
     <label>
-      <span>倉庫容量:</span>
+      <span>装備倉庫:</span>
       <input type="number" id="storage" min="0" oninput="handleInput(this)">
     </label>
     <label>
-      <span>臨時待機室容量:</span>
+      <span>戦闘員臨時待機室:</span>
       <input type="number" id="tempWaitingRoom" min="0" oninput="handleInput(this)">
     </label>
     <label>
-      <span>臨時倉庫容量:</span>
+      <span>装備臨時倉庫:</span>
       <input type="number" id="tempStorage" min="0" oninput="handleInput(this)">
     </label>
     <label>
@@ -164,10 +164,10 @@
       };
 
       const costList = [
-        { name: '待機室容量', cost: Math.ceil(diff * costs.waitingRoom) },
-        { name: '臨時待機室容量', cost: Math.ceil(diff * costs.tempWaitingRoom) },
-        { name: '倉庫容量', cost: Math.ceil(diff * costs.storage) },
-        { name: '臨時倉庫容量', cost: Math.ceil(diff * costs.tempStorage) },
+        { name: '戦闘員待機室', cost: Math.ceil(diff * costs.waitingRoom) },
+        { name: '戦闘員臨時待機室', cost: Math.ceil(diff * costs.tempWaitingRoom) },
+        { name: '装備倉庫', cost: Math.ceil(diff * costs.storage) },
+        { name: '装備臨時倉庫', cost: Math.ceil(diff * costs.tempStorage) },
       ];
 
       const cheapest = costList.reduce((min, curr) => curr.cost < min.cost ? curr : min, costList[0]);
