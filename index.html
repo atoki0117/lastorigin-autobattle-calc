@@ -116,3 +116,93 @@
         const el = document.getElementById(id);
         const value = el.type === "checkbox" ? el.checked : el.value;
         localStorage.setItem(id, value);
+      });
+    }
+
+    function loadValues() {
+      fields.forEach(id => {
+        const el = document.getElementById(id);
+        const value = localStorage.getItem(id);
+        if (value !== null) {
+          if (el.type === "checkbox") {
+            el.checked = (value === "true");
+          } else {
+            el.value = value;
+          }
+        }
+      });
+    }
+
+    function handleInput(el) {
+      saveValues();
+      calculate();
+    }
+
+    function calculate() {
+      const waitingRoom = parseInt(document.getElementById('waitingRoom').value) || 0;
+      const tempWaitingRoom = parseInt(document.getElementById('tempWaitingRoom').value) || 0;
+      const storage = parseInt(document.getElementById('storage').value) || 0;
+      const tempStorage = parseInt(document.getElementById('tempStorage').value) || 0;
+      const hasSubscription = document.getElementById('hasSubscription').checked;
+
+      const totalCapacity = waitingRoom + tempWaitingRoom + storage + tempStorage;
+      const extraHours = Math.floor(totalCapacity / 1000);
+      const baseHours = 3;
+      const subscriptionBonus = hasSubscription ? 1 : 0;
+
+      let total = baseHours + extraHours + subscriptionBonus;
+      const maxHours = 12;
+
+      const nextThreshold = (extraHours + 1) * 1000;
+      const diff = nextThreshold - totalCapacity;
+
+      const costs = {
+        waitingRoom: 2,
+        tempWaitingRoom: 2,
+        storage: 0.5,
+        tempStorage: 0.5
+      };
+
+      const costList = [
+        { name: '戦闘員待機室', cost: Math.ceil(diff * costs.waitingRoom) },
+        { name: '戦闘員臨時待機室', cost: Math.ceil(diff * costs.tempWaitingRoom) },
+        { name: '装備倉庫', cost: Math.ceil(diff * costs.storage) },
+        { name: '装備臨時倉庫', cost: Math.ceil(diff * costs.tempStorage) },
+      ];
+
+      // ★ 固定で「装備臨時倉庫」を選択
+      const cheapest = costList.find(item => item.name === '装備臨時倉庫');
+
+      const warningDiv = document.getElementById('warning');
+      const overCapacityLimit = (maxHours - baseHours - subscriptionBonus) * 1000;
+      const isOver = total > maxHours || (total === maxHours && (totalCapacity > overCapacityLimit));
+
+      if (isOver) {
+        const overHours = total - maxHours;
+        const overCapacity = totalCapacity - overCapacityLimit;
+        warningDiv.innerHTML = `⚠ 自律戦闘時間は最大 ${maxHours} 時間です（<strong>${overHours} 時間</strong>・<strong>${overCapacity} 容量</strong>分オーバーしています）。`;
+        total = maxHours;
+      } else {
+        warningDiv.textContent = "";
+      }
+
+      document.getElementById('result').textContent = `自律戦闘可能時間: ${total} 時間`;
+
+      let hintHtml = `次の1時間を追加するにはあと ${diff} 容量が必要です。<br>`;
+      hintHtml += `最小コストで拡張するには:<br>`;
+      hintHtml += `・<strong>${cheapest.name}</strong> を拡張 → <strong>${cheapest.cost} ツナ缶</strong><br><br>`;
+      hintHtml += `他の選択肢:<br>`;
+      costList.forEach(item => {
+        hintHtml += `・${item.name} を拡張 → 約 ${item.cost} ツナ缶<br>`;
+      });
+
+      document.getElementById('nextHourHint').innerHTML = hintHtml;
+    }
+
+    window.onload = function () {
+      loadValues();
+      calculate();
+    };
+  </script>
+</body>
+</html>
